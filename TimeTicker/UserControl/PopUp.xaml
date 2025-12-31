@@ -1,0 +1,109 @@
+﻿<UserControl x:Class="TimeTicker.UserControl.PopUp"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:tb="http://www.hardcodet.net/taskbar"
+             xmlns:viewModel="clr-namespace:TimeTicker.ViewModel"
+             xmlns:local="clr-namespace:TimeTicker"
+             mc:Ignorable="d" 
+             
+                Width="{x:Static local:UIHelper.WindowWidth}" 
+                      Height="{x:Static local:UIHelper.WindowHeight}"
+             d:DesignHeight="120" d:DesignWidth="240"
+             DataContext="{DynamicResource TimeTickerViewModel}" >
+
+    
+    <UserControl.Resources>
+        <Storyboard x:Key="FadeIn">
+            <DoubleAnimationUsingKeyFrames BeginTime="00:00:00"
+                                           Storyboard.TargetName="grid"
+                                           Storyboard.TargetProperty="(UIElement.Opacity)">
+                <SplineDoubleKeyFrame KeyTime="00:00:00"
+                                      Value="0" />
+                <SplineDoubleKeyFrame KeyTime="00:00:01"
+                                      Value="0.95" />
+                <SplineDoubleKeyFrame KeyTime="00:00:03"
+                                      Value="0.95" />
+                <!--				<SplineDoubleKeyFrame KeyTime="00:00:05" Value="0"/>-->
+            </DoubleAnimationUsingKeyFrames>
+        </Storyboard>
+        
+        <Storyboard x:Key="FadeBack">
+            <DoubleAnimationUsingKeyFrames BeginTime="00:00:00"
+                                           Storyboard.TargetName="grid"
+                                           Storyboard.TargetProperty="(UIElement.Opacity)">
+                <SplineDoubleKeyFrame KeyTime="00:00:00"
+                                      Value="1" />
+                <SplineDoubleKeyFrame KeyTime="00:00:00.3000000"
+                                      Value="1" />
+            </DoubleAnimationUsingKeyFrames>
+        </Storyboard>
+        <Storyboard x:Key="FadeOut" >
+            <DoubleAnimationUsingKeyFrames BeginTime="00:00:00"
+                                           Storyboard.TargetName="grid"
+                                           Storyboard.TargetProperty="(UIElement.Opacity)">
+                <SplineDoubleKeyFrame KeyTime="00:00:00"
+                                      Value="1" />
+                <SplineDoubleKeyFrame KeyTime="00:00:00.3000000"
+                                      Value="0.2" />
+            </DoubleAnimationUsingKeyFrames>
+        </Storyboard>
+    </UserControl.Resources>
+    <UserControl.Triggers>
+        <EventTrigger RoutedEvent="tb:TaskbarIcon.BalloonShowing">
+            <BeginStoryboard Storyboard="{StaticResource FadeIn}"
+                             x:Name="FadeIn_BeginStoryboard" />
+        </EventTrigger>
+     
+        <EventTrigger RoutedEvent="Mouse.MouseEnter">
+            <StopStoryboard BeginStoryboardName="FadeIn_BeginStoryboard" />
+            <BeginStoryboard x:Name="FadeBack_BeginStoryboard1"
+                             Storyboard="{StaticResource FadeBack}" />
+        </EventTrigger>
+        <EventTrigger RoutedEvent="tb:TaskbarIcon.BalloonClosing">
+            <BeginStoryboard Storyboard="{StaticResource FadeOut}"
+                             x:Name="FadeOut_BeginStoryboard" />
+        </EventTrigger>
+    </UserControl.Triggers>
+
+
+    <Grid x:Name="grid"  >
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" ></ColumnDefinition>
+                    <ColumnDefinition Width="*" ></ColumnDefinition>
+                    <ColumnDefinition Width="Auto" ></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" ></RowDefinition>
+                    <RowDefinition Height="*" ></RowDefinition>
+                    <RowDefinition Height="Auto" ></RowDefinition>
+                </Grid.RowDefinitions>
+                <DataGrid Grid.Column="1" Padding="2" Grid.Row="1"  ItemsSource="{Binding TimeEntryList}" VerticalAlignment="Stretch" ColumnWidth="*" AutoGenerateColumns="False" CanUserSortColumns="False" IsReadOnly="True" >
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Time In" Binding="{Binding TimeIn}" Width="*"  />
+                        <DataGridTextColumn Header="Time Out" Binding="{Binding TimeOut}" Width="*" />
+                        <!--<DataGridTextColumn Header="Out Hours" Binding="{Binding OutHours}" Width="*" />-->
+                        <DataGridTextColumn Header="Work Hours" Binding="{Binding WorkHours}" Width="*" />
+                    </DataGrid.Columns>
+                </DataGrid>
+                <StackPanel Grid.Column="1" Grid.Row="2" Background="#CCCC" >
+                    <TextBlock  >
+                    <Run  Text="Total Work Time :"/>
+                    <Run  Text="{Binding TotalWorkHours}"/>
+                    </TextBlock>
+
+                    <TextBlock>
+                    <Run  Text="Out Hours:"/>
+                    <Run  Text="{Binding TotalOutHoursString,Mode=OneWay}"/>
+                    </TextBlock>
+
+                    <TextBlock>
+                    <Run  Text="Time To Go Home:"/>
+                    <Run  Text="{Binding TimeToGoHome, StringFormat={}{0:h:mm tt}}"/>
+                    </TextBlock>
+
+                    
+                </StackPanel>
+    </Grid>
+</UserControl>

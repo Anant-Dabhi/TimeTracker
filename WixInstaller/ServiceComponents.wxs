@@ -1,0 +1,38 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+	<Fragment>
+		<ComponentGroup Id="ServiceComponents" Directory="INSTALLFOLDER">
+			<Component Id="TimeTrackerServiceComponent" Guid="*">
+				<File
+  Id="TimeTrackerServiceExe"
+  Source="$(var.TimeTrackerService.TargetDir)TimeTrackerService.exe"
+  KeyPath="yes" />
+
+
+				<ServiceInstall
+				  Id="TimeTrackerServiceInstall"
+				  Name="TimeTrackerService"
+				  DisplayName="Time Tracker Service"
+				  Description="Tracks login, lock, unlock times"
+				  Start="auto"
+				  Type="ownProcess"
+				  ErrorControl="normal"
+				  Account="LocalSystem" />
+
+				<ServiceControl
+				  Id="TimeTrackerServiceControl"
+				  Name="TimeTrackerService"
+				  Start="install"
+				  Stop="both"
+				  Remove="uninstall"
+				  Wait="yes" />
+				
+				
+			</Component>
+
+			<!-- REQUIRED DLL -->
+			<Component Id="TimeTickerUtilForService" Guid="*">
+				<File Source="$(var.TimeTickerUtil.TargetPath)" />
+			</Component>
+		</ComponentGroup>
+	</Fragment>
+</Wix>

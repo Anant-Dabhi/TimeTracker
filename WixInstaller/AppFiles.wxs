@@ -1,0 +1,38 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+	<Fragment>
+		<ComponentGroup Id="AppFiles" Directory="INSTALLFOLDER">
+			<Component Id="UiExeComponent" Guid="*">
+				<File
+					Id="TimeTickerExeFile"
+					Source="$(var.TimeTicker.TargetDir)TimeTicker.exe"
+					KeyPath="yes" />
+			</Component>
+			<Component Id="TimeTickerExeConfig" Guid="*">
+				<File Source="$(var.TimeTicker.TargetDir)TimeTicker.exe.config" />
+			</Component>
+
+			<!--<Component Id="HardcodetDll" Guid="*">
+				<File Source="$(var.TimeTicker.TargetDir)Hardcodet.Wpf.TaskbarNotification.dll" />
+			</Component>-->
+
+			<Component Id="MahAppsMetroDll" Guid="*">
+				<File Source="$(var.TimeTicker.TargetDir)MahApps.Metro.dll" />
+			</Component>
+
+			<Component Id="MahAppsMetroXml" Guid="*">
+				<File Source="$(var.TimeTicker.TargetDir)MahApps.Metro.xml" />
+			</Component>
+
+			<Component Id="SystemInteractivityDll" Guid="*">
+				<File Source="$(var.TimeTicker.TargetDir)System.Windows.Interactivity.dll" />
+			</Component>
+
+
+
+			<Component Id="NotifyIconWpf" Guid="*">
+				<File Source="$(var.NotifyIconWpf.TargetPath)" />
+			</Component>
+			
+		</ComponentGroup>
+	</Fragment>
+</Wix>

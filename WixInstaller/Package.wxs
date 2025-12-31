@@ -1,0 +1,38 @@
+﻿<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+	<Package
+	  Name="TimeTracker"
+	  Manufacturer="Anant"
+	  Version="1.0.0.0"
+	  UpgradeCode="35f1c0f6-4329-426c-81d8-5bd76af8c836">
+
+		<MajorUpgrade DowngradeErrorMessage="A newer version is already installed." />
+
+		<Feature Id="MainFeature" Title="Time Tracker">
+			<ComponentGroupRef Id="AppFiles" />
+			<ComponentGroupRef Id="ServiceComponents" />
+			<ComponentGroupRef Id="Shortcuts" />
+		</Feature>
+
+		<!-- Exit dialog checkbox text -->
+		<Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT"
+				  Value="Launch Time Tracker" />
+
+		<Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOX"
+          Value="1" />
+
+		<!-- Launch TimeTracker.exe -->
+		<CustomAction
+		  Id="LaunchTimeTracker"
+		  FileRef="TimeTickerExeFile"
+		  ExeCommand=""
+		  Execute="immediate"
+		  Impersonate="yes" />
+
+
+
+
+	</Package>
+	
+	
+	
+</Wix>

@@ -1,0 +1,46 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+	<Fragment>
+		<ComponentGroup Id="Shortcuts">
+			<Component Id="StartMenuShortcutComponent" Guid="*">
+				<Shortcut
+				  Id="TimeTrackerStartMenuShortcut"
+				  Directory="AppProgramsFolder"
+				  Name="Time Tracker"
+				  Target="[INSTALLFOLDER]TimeTicker.exe"
+				  WorkingDirectory="INSTALLFOLDER" />
+
+				<RemoveFolder
+				  Id="RemoveAppProgramsFolder"
+				  Directory="AppProgramsFolder"
+				  On="uninstall" />
+
+				<RegistryValue
+				  Root="HKCU"
+				  Key="Software\TatvaSoft\TimeTracker"
+				  Name="Installed"
+				  Type="integer"
+				  Value="1"
+				  KeyPath="yes" />
+			</Component>
+
+			<!-- Desktop Shortcut -->
+			<Component Id="DesktopShortcutComponent" Guid="*">
+				<Shortcut
+				  Id="DesktopShortcut"
+				  Directory="DesktopFolder"
+				  Name="Time Tracker"
+				  Target="[INSTALLFOLDER]TimeTicker.exe"
+				  WorkingDirectory="INSTALLFOLDER" />
+
+				<RegistryValue
+				  Root="HKCU"
+				  Key="Software\TimeTracker"
+				  Name="DesktopShortcut"
+				  Type="integer"
+				  Value="1"
+				  KeyPath="yes" />
+			</Component>
+			
+		</ComponentGroup>
+	</Fragment>
+</Wix>
