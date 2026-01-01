@@ -3,6 +3,7 @@
 	  Name="TimeTracker"
 	  Manufacturer="Anant"
 	  Version="1.0.0.0"
+	  Compressed="true"
 	  UpgradeCode="35f1c0f6-4329-426c-81d8-5bd76af8c836">
 
 		<MajorUpgrade DowngradeErrorMessage="A newer version is already installed." />

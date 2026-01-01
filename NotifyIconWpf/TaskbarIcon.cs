@@ -114,31 +114,31 @@ namespace Hardcodet.Wpf.TaskbarNotification
 
         string[] tooltips = new string[]
 {
-    "TimeTicker by Anant ⏰ – Tracking your time like a ninja!",
-    "TimeTicker by Anant – Making hours count!",
-    "TimeTicker by Anant ⏱ – Your productivity sidekick!",
-    "TimeTicker by Anant – 8 hours today? You rock! 🎉",
-    "TimeTicker by Anant – Keep calm and track on!",
-    "TimeTicker by Anant – Every minute counts!",
-    "TimeTicker by Anant – Tick, Tock, Track!",
-    "TimeTicker by Anant – Time flies, we track!",
-    "TimeTicker by Anant – Because your time matters!",
-    "TimeTicker by Anant – Making work hours less boring!",
-    "TimeTicker by Anant – Tracking your time, one tick at a time!",
-    "TimeTicker by Anant – The boss is watching (kidding!) 😉",
-    "TimeTicker by Anant – Time well spent!",
-    "TimeTicker by Anant – Your hourly cheerleader!",
-    "TimeTicker by Anant – Don’t let time sneak past!",
-    "TimeTicker by Anant – Hours tracked, happiness unlocked!",
-    "TimeTicker by Anant – Your silent productivity buddy!",
-    "TimeTicker by Anant – Every second counts!",
-    "TimeTicker by Anant – Because coffee alone won’t track it!",
-    "TimeTicker by Anant – Tick-tock goes the productivity clock!",
-    "TimeTicker by Anant – Reward yourself after 8.5 hours!",
-    "TimeTicker by Anant – The time wizard at your desk!",
-    "TimeTicker by Anant – Keeping you honest with your hours!",
-    "TimeTicker by Anant – Tracking your grind since 2025!",
-    "TimeTicker by Anant – Making your work hours legendary!"
+    "TimeTicker ⏰ – Tracking your time like a ninja!",
+    "TimeTicker – Making hours count!",
+    "TimeTicker ⏱ – Your productivity sidekick!",
+    "TimeTicker – 8 hours today? You rock! 🎉",
+    "TimeTicker – Keep calm and track on!",
+    "TimeTicker – Every minute counts!",
+    "TimeTicker – Tick, Tock, Track!",
+    "TimeTicker – Time flies, we track!",
+    "TimeTicker – Because your time matters!",
+    "TimeTicker – Making work hours less boring!",
+    "TimeTicker – Tracking your time, one tick at a time!",
+    "TimeTicker – The boss is watching (kidding!) 😉",
+    "TimeTicker – Time well spent!",
+    "TimeTicker – Your hourly cheerleader!",
+    "TimeTicker – Don’t let time sneak past!",
+    "TimeTicker – Hours tracked, happiness unlocked!",
+    "TimeTicker – Your silent productivity buddy!",
+    "TimeTicker – Every second counts!",
+    "TimeTicker – Because coffee alone won’t track it!",
+    "TimeTicker – Tick-tock goes the productivity clock!",
+    "TimeTicker – Reward yourself after 8.5 hours!",
+    "TimeTicker – The time wizard at your desk!",
+    "TimeTicker – Keeping you honest with your hours!",
+    "TimeTicker – Tracking your grind since 2026!",
+    "TimeTicker – Making your work hours legendary!"
 };
 
 
@@ -179,7 +179,7 @@ namespace Hardcodet.Wpf.TaskbarNotification
                     Dispatcher.InvokeAsync(() => {
                         ToolTipText = tooltips[random.Next(tooltips.Length)];
                     });
-                    await Task.Delay(TimeSpan.FromSeconds(5));
+                    await Task.Delay(TimeSpan.FromMinutes(5));
                 }
             });
 
@@ -267,7 +267,7 @@ namespace Hardcodet.Wpf.TaskbarNotification
             popup.Placement = PlacementMode.AbsolutePoint;
             popup.StaysOpen = true;
 
-            Point position = TrayInfo.GetTrayLocation();
+            System.Drawing.Point position = TrayInfo.GetTrayLocation();
             position = GetDeviceCoordinates(position);
             popup.HorizontalOffset = position.X - 1;
             popup.VerticalOffset = position.Y - 1;
@@ -433,7 +433,7 @@ namespace Hardcodet.Wpf.TaskbarNotification
 
 
             //get mouse coordinates
-            Point cursorPosition = new Point();
+            System.Drawing.Point cursorPosition = new System.Drawing.Point();
             if (messageSink.Version == NotifyIconVersion.Vista)
             {
                 //physical cursor position is supported for Vista and above
@@ -700,7 +700,7 @@ namespace Hardcodet.Wpf.TaskbarNotification
         /// Displays the <see cref="TrayPopup"/> control if
         /// it was set.
         /// </summary>
-        private void ShowTrayPopup(Point cursorPosition)
+        private void ShowTrayPopup(System.Drawing.Point cursorPosition)
         {
             if (IsDisposed) return;
 
@@ -751,7 +751,7 @@ namespace Hardcodet.Wpf.TaskbarNotification
         /// Displays the <see cref="ContextMenu"/> if
         /// it was set.
         /// </summary>
-        private void ShowContextMenu(Point cursorPosition)
+        private void ShowContextMenu(System.Drawing.Point cursorPosition)
         {
             if (IsDisposed) return;
 
@@ -1013,7 +1013,7 @@ namespace Hardcodet.Wpf.TaskbarNotification
         /// </summary>
         /// <param name="point"></param>
         /// <returns></returns>
-        private Point GetDeviceCoordinates(Point point)
+        private System.Drawing.Point GetDeviceCoordinates(System.Drawing.Point point)
         {
             if (double.IsNaN(scalingFactor))
             {
@@ -1033,7 +1033,7 @@ namespace Hardcodet.Wpf.TaskbarNotification
             //on standard DPI settings, just return the point
             if (scalingFactor == 1.0) return point;
 
-            return new Point() {X = (int) (point.X*scalingFactor), Y = (int) (point.Y*scalingFactor)};
+            return new System.Drawing.Point() {X = (int) (point.X*scalingFactor), Y = (int) (point.Y*scalingFactor)};
         }
 
         #region Dispose / Exit

@@ -12,42 +12,47 @@ namespace Hardcodet.Wpf.TaskbarNotification.Interop
     /// </summary>
     public static class TrayInfo
     {
-        /// <summary>
-        /// Gets the position of the system tray.
-        /// </summary>
-        /// <returns>Tray coordinates.</returns>
-        public static Point GetTrayLocation()
+        [DllImport("user32.dll")]
+        private static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr FindWindowEx(
+            IntPtr parentHandle,
+            IntPtr childAfter,
+            string className,
+            string windowTitle);
+
+        [DllImport("user32.dll")]
+        private static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
+
+        public static System.Drawing.Point GetTrayLocation()
         {
-            var info = new AppBarInfo();
-            info.GetSystemTaskBarPosition();
+            // Main taskbar
+            IntPtr taskbar = FindWindow("Shell_TrayWnd", null);
+            if (taskbar == IntPtr.Zero)
+                return System.Drawing.Point.Empty;
 
-            Rectangle rcWorkArea = info.WorkArea;
+            // Tray notification area
+            IntPtr tray = FindWindowEx(taskbar, IntPtr.Zero, "TrayNotifyWnd", null);
+            if (tray == IntPtr.Zero)
+                return System.Drawing.Point.Empty;
 
-            int x = 0, y = 0;
-            if (info.Edge == AppBarInfo.ScreenEdge.Left)
-            {
-                x = rcWorkArea.Left + 2;
-                y = rcWorkArea.Bottom;
-            }
-            else if (info.Edge == AppBarInfo.ScreenEdge.Bottom)
-            {
-                x = rcWorkArea.Right;
-                y = rcWorkArea.Bottom;
-            }
-            else if (info.Edge == AppBarInfo.ScreenEdge.Top)
-            {
-                x = rcWorkArea.Right;
-                y = rcWorkArea.Top;
-            }
-            else if (info.Edge == AppBarInfo.ScreenEdge.Right)
-            {
-                x = rcWorkArea.Right;
-                y = rcWorkArea.Bottom;
-            }
+            GetWindowRect(tray, out RECT rect);
 
-            return new Point {X = x, Y = y};
+            // Bottom-right corner of visible tray icons
+            return new System.Drawing.Point(rect.Right, rect.Bottom);
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct RECT
+        {
+            public int Left;
+            public int Top;
+            public int Right;
+            public int Bottom;
         }
     }
+
 
 
     internal class AppBarInfo

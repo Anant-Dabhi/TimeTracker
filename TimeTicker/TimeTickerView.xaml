@@ -7,6 +7,8 @@
         ShowMaxRestoreButton="False" 
         Width="{x:Static local:UIHelper.WindowWidth}" 
         Height="{x:Static local:UIHelper.WindowHeight}" ShowCloseButton="True"
+                      WindowState="Normal"
+                      WindowStartupLocation="CenterScreen"
         MinHeight="{x:Static local:UIHelper.WindowMinHeight}" MaxHeight="{x:Static local:UIHelper.WindowMaxHeight}" 
         Topmost="True" UseLayoutRounding="True" DataContext="{StaticResource TimeTickerViewModel}" Title="Time Log"  >
 
@@ -15,19 +17,24 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <DockPanel Grid.Row="0" >
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <DockPanel Grid.Row="0" Grid.ColumnSpan="2" >
             <Menu DockPanel.Dock="Top">
                 <MenuItem Header="_File">
                     <MenuItem Header="_Open" Click="fileopen_click" />
-                    <MenuItem Header="_Add" Click="MenuItem_Click"/>
+                    <MenuItem Header="_Close" Click="btnClose_Click" />
                 </MenuItem>
             </Menu>
             <StackPanel></StackPanel>
         </DockPanel>
 
 
-        <Grid Grid.Row="1" >
+        <Grid Grid.Row="1" Grid.ColumnSpan="2" >
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" ></ColumnDefinition>
                 <ColumnDefinition Width="*" ></ColumnDefinition>
@@ -38,37 +45,98 @@
                 <RowDefinition Height="*" ></RowDefinition>
                 <RowDefinition Height="Auto" ></RowDefinition>
             </Grid.RowDefinitions>
-            
-            
-            
-            
-            <DataGrid Grid.Column="1" Padding="2" Grid.Row="1"  ItemsSource="{Binding TimeEntryList}" VerticalAlignment="Stretch" ColumnWidth="*" AutoGenerateColumns="False" CanUserSortColumns="False" IsReadOnly="True" >
+
+
+
+
+            <DataGrid  Grid.ColumnSpan="2" Padding="2" Grid.Row="1"  ItemsSource="{Binding TimeEntryList}" VerticalAlignment="Stretch" ColumnWidth="*" AutoGenerateColumns="False" CanUserSortColumns="False" IsReadOnly="True" >
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Time In" Binding="{Binding TimeIn}" Width="*"  />
-                    <DataGridTextColumn Header="Time Out" Binding="{Binding TimeOut}" Width="*" />
+                    <DataGridTextColumn Header="Time In" Binding="{Binding TimeInText}" Width="*"  />
+                    <DataGridTextColumn Header="Time Out" Binding="{Binding TimeOutText}" Width="*" />
                     <!--<DataGridTextColumn Header="Out Hours" Binding="{Binding OutHours}" Width="*" />-->
-                    <DataGridTextColumn Header="Work Hours" Binding="{Binding WorkHours}" Width="*" />
+                    <DataGridTextColumn Header="Work Hours" Binding="{Binding WorkHoursText}" Width="*" />
                 </DataGrid.Columns>
             </DataGrid>
-            <StackPanel Grid.Column="1" Grid.Row="2" Background="#CCCC" >
-                <TextBlock  >
-                    <Run  Text="Total Work Time :"/>
-                    <Run  Text="{Binding TotalWorkHours}"/>
-                </TextBlock>
-
-                <TextBlock>
-                    <Run  Text="Out Hours:"/>
-                    <Run  Text="{Binding TotalOutHoursString,Mode=OneWay}"/>
-                </TextBlock>
-
-                <TextBlock>
-                    <Run  Text="Time To Go Home:"/>
-                    <Run  Text="{Binding TimeToGoHome, StringFormat={}{0:h:mm tt}}"/>
-                </TextBlock>
-
-
-            </StackPanel>
+           
         </Grid>
+
+        <StackPanel  Grid.Row="2" Margin="10" Grid.ColumnSpan="2" >
+
+            <!-- Progress Text -->
+            <TextBlock FontWeight="SemiBold" Margin="0,0,0,5">
+        <Run Text="Daily Progress: " />
+        <Run Text="{Binding WorkProgressText,Mode=OneWay}" />
+            </TextBlock>
+
+            <!-- Progress Bar -->
+            <ProgressBar
+        Height="10"
+        Minimum="0"
+        Maximum="100"
+        Value="{Binding WorkProgressPercent,Mode=OneWay}"/>
+
+            <!-- Existing Info -->
+            <TextBlock Margin="0,8,0,0">
+        <Run Text="Total Work Time: " />
+        <Run Text="{Binding TotalWorkHours, StringFormat={}{0:hh\\:mm}}" />
+            </TextBlock>
+
+            <TextBlock>
+        <Run Text="Out Hours: " />
+        <Run Text="{Binding TotalOutHoursString,Mode=OneWay}" />
+            </TextBlock>
+
+            <TextBlock>
+        <Run Text="Time To Go Home: " />
+        <Run Text="{Binding TimeToGoHome, StringFormat={}{0:h:mm tt}}" />
+            </TextBlock>
+
+        </StackPanel>
+
+        <!--<StackPanel Grid.Row="2"
+            Orientation="Horizontal"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Bottom"
+                    Grid.Column="1"
+            Margin="0,0,10,10">
+
+            --><!-- Green dot --><!--
+            <Ellipse Width="10"
+             Height="10"
+             Fill="LimeGreen"
+             VerticalAlignment="Center"
+             Margin="0,0,6,0"/>
+
+            --><!-- Text with tooltip --><!--
+            <TextBlock FontSize="12"
+               FontWeight="SemiBold"
+               VerticalAlignment="Center">
+
+                <TextBlock.ToolTip>
+                    <ItemsControl ItemsSource="{Binding ActiveUsers,Mode=OneWay}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock>
+                            <Run Text="{Binding UserName}" />
+                            <Run Text=" @" />
+                            <Run Text="{Binding MachineName}" />
+                            <Run Text=" (" />
+                            <Run Text="{Binding Ip}" />
+                            <Run Text=")" />
+                                </TextBlock>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </TextBlock.ToolTip>
+
+        <Run Text="Total users live : " />
+        <Run Text="{Binding ActiveUserCount,Mode=OneWay}" />
+        <Run Text=" users" />
+    </TextBlock>
+
+        </StackPanel>-->
+
+
 
     </Grid>
 

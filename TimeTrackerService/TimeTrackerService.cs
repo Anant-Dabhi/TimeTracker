@@ -7,55 +7,65 @@ using System.Linq;
 using System.ServiceProcess;
 using System.Text;
 using System.Threading.Tasks;
+using TimeTickerUtil;
 
 namespace TimeTrackerService
 {
     public partial class TimeTrackerService : ServiceBase
     {
+
         public TimeTrackerService()
         {
             InitializeComponent();
             CanHandleSessionChangeEvent = true; // 🔴 REQUIRED
 
         }
-
         protected override void OnStart(string[] args)
         {
-            
-            try
+            //System.Diagnostics.Debugger.Launch();
+            // Service started while user might already be logged in
+            if (IsUserSessionActive())
             {
-                TimeTickerUtil.TimeTickerHelper.WriteToFile(true);
-            }
-            catch (Exception ex)
-            {
-                EventLog.WriteEntry(
-                    "Startup failed: " + ex.ToString(),
-                    EventLogEntryType.Error
-                );
-                throw;
+                TimeTickerHelper.LogState(true);
             }
         }
 
+
+
         protected override void OnStop()
         {
+            // Optional: close open session
+            TimeTickerHelper.LogState(false);
         }
 
         protected override void OnSessionChange(SessionChangeDescription change)
         {
-            DateTime now = DateTime.Now;
-
             switch (change.Reason)
             {
-                case SessionChangeReason.SessionLock:
-                    TimeTickerUtil.TimeTickerHelper.InsertSingleTimeEntry(now);
+                case SessionChangeReason.SessionLogon:
+                case SessionChangeReason.SessionUnlock:
+                    TimeTickerHelper.LogState(true);
+                    System.Diagnostics.Debug.WriteLine("unlock");
                     break;
 
-                case SessionChangeReason.SessionUnlock:
-                case SessionChangeReason.SessionLogon:
-                    TimeTickerUtil.TimeTickerHelper.InsertSingleTimeEntry(now);
+                case SessionChangeReason.SessionLock:
+                    TimeTickerHelper.LogState(false);
+                    System.Diagnostics.Debug.WriteLine("lock");
                     break;
             }
         }
+
+        private bool IsUserSessionActive()
+        {
+            // If at least one interactive session exists → user active
+            return System.Diagnostics.Process
+                .GetProcessesByName("explorer")
+                .Any();
+        }
+
+
+
+
 
     }
 }

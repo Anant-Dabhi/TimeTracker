@@ -32,35 +32,11 @@ namespace TimeTicker
             }
             DispatcherUnhandledException += App_DispatcherUnhandledException;
 
-            //SystemEvents.SessionSwitch += SystemEvents_SessionSwitch;
 
-            TimeTickerUtil.TimeTickerHelper.WriteToFile(true);
 
         }
 
-        //private void SystemEvents_SessionSwitch(object sender, SessionSwitchEventArgs e)
-        //{
-        //    switch (e.Reason)
-        //    {
-        //        case SessionSwitchReason.SessionLock:
-        //            if (Application.Current.MainWindow.Content is FrameworkElement conten)
-        //            {
-                        
-        //                //var vm = conten.DataContext as TimeTickerViewModel;
-        //                //if (vm!=null)
-        //                //{
-        //                //    vm.TimeEntryList
-        //                //}
-        //            }
-
-        //            Util.TimeTickerService.WriteToFile();
-        //            break;
-        //        case SessionSwitchReason.SessionUnlock:
-        //            Util.TimeTickerService.WriteToFile();
-        //            break;
-        //    }
-        //}
-
+      
         private void notifyIcon_TrayToolTipClose(object sender, RoutedEventArgs e)
         {
             Task.Run(async () =>
@@ -78,7 +54,9 @@ namespace TimeTicker
 
         void App_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
         {
+#if DEBUG
             Debugger.Launch();
+#endif
         }
         protected override void OnExit(ExitEventArgs e)
         {
@@ -86,16 +64,7 @@ namespace TimeTicker
             base.OnExit(e);
         }
 
-        private void TaskbarIcon_TrayRightMouseDown(object sender, RoutedEventArgs e)
-        {
-            _notifyIcon.ShowBalloonTip("Time Tracker",
-                    "🎉 Congrats! You've completed 8.5 hours! 🎉",
-                    BalloonIcon.None);
-        }
+       
 
-        private void TaskbarIcon_MouseUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
-        {
-            
-        }
     }
 }

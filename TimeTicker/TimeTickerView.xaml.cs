@@ -37,7 +37,7 @@ namespace TimeTicker
         public void CalculateTime()
         {
             (DataContext as TimeTickerViewModel).TimeEntryList = new System.Collections.ObjectModel.ObservableCollection<Model.TimeEntryModel>();
-            (DataContext as TimeTickerViewModel).GetTimeData();
+            (DataContext as TimeTickerViewModel).LoadTimeData();
         }
 
         private void notifyIcon_TrayToolTipClose(object sender, RoutedEventArgs e)
@@ -96,10 +96,10 @@ namespace TimeTicker
             if (popup.ShowDialog() == true)
             {
                 DateTime selected = popup.SelectedDateTime.Value;
-                TimeTickerUtil.TimeTickerHelper.InsertSingleTimeEntry(selected);
-                (DataContext as TimeTickerViewModel).TimeEntryList = new System.Collections.ObjectModel.ObservableCollection<Model.TimeEntryModel>();
+                //TimeTickerUtil.TimeTickerHelper.InsertSingleTimeEntry(selected);
+                //(DataContext as TimeTickerViewModel).TimeEntryList = new System.Collections.ObjectModel.ObservableCollection<Model.TimeEntryModel>();
 
-                (DataContext as TimeTickerViewModel).GetTimeData();
+                //(DataContext as TimeTickerViewModel).GetTimeData();
             }
         }
 
@@ -108,7 +108,7 @@ namespace TimeTicker
             
                 Process.Start(new ProcessStartInfo
                 {
-                    FileName = TimeTickerUtil.TimeTickerHelper.FilePath,
+                    FileName = TimeTickerUtil.TimeTickerHelper.TodayFile,
                     UseShellExecute = true
                 });
 

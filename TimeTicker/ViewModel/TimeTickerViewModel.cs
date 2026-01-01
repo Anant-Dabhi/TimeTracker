@@ -1,15 +1,20 @@
-﻿using System;
+﻿using Hardcodet.Wpf.TaskbarNotification;
+using System;
+using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Reflection;
 using System.Security.AccessControl;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Threading;
-using Hardcodet.Wpf.TaskbarNotification;
 using TimeTicker.Model;
 using TimeTickerUtil;
 
@@ -17,16 +22,14 @@ namespace TimeTicker.ViewModel
 {
     public class TimeTickerViewModel : MainViewModel
     {
-        TimeSpan _totalWorkTimeOfDay = new TimeSpan(8, 30, 00);
-        private int count = 0;
-        private const string TimeFormat = "h:mm tt";
-        private ObservableCollection<TimeEntryModel> _timeEntryList;
-        private TimeSpan _totalWorkHours, _totalOutHours;
-        private DateTime _timeToGoHome;
-        private TimeEntryModel _lastTimeEntry;
-        private DispatcherTimer _dispatcherTimer;
-        private TaskbarIcon notifyIcon;
 
+        private ObservableCollection<TimeEntryModel> _timeEntryList;
+        private readonly TimeSpan _targetWork = TimeSpan.FromHours(8.5);
+        private DispatcherTimer _timer;
+        private bool _celebrationShown;
+        DateTime _timeToGoHome;
+        TimeSpan _totalWorkHours;
+        private TimeEntryModel _lastTimeEntry;
 
         string[] completionMessages =
 {
@@ -47,25 +50,13 @@ namespace TimeTicker.ViewModel
 "🐢 You made it! Slowly… but you made it!"
 
 };
-
+        private TimeSpan _totalOutHours;
 
         public TimeTickerViewModel()
         {
-            
-        }
-        public TimeEntryModel LastTimeEntry
-        {
-            get
-            {
-                return _lastTimeEntry;
-            }
-            set
-            {
-                _lastTimeEntry = value;
-                RaisePropertyChanged(() => LastTimeEntry);
 
-            }
         }
+
         public ObservableCollection<TimeEntryModel> TimeEntryList
         {
             get { return _timeEntryList ?? (_timeEntryList = new ObservableCollection<TimeEntryModel>()); }
@@ -75,14 +66,32 @@ namespace TimeTicker.ViewModel
                 RaisePropertyChanged(() => TimeEntryList);
             }
         }
+
+        private const double TargetHours = 8.5;
+
+        public double WorkProgressPercent
+        {
+            get
+            {
+                var progress = TotalWorkHours.TotalHours / TargetHours * 100;
+                return Math.Min(progress, 100);
+            }
+        }
+
+        public string WorkProgressText =>
+            $"{WorkProgressPercent:0}%";
+
         public TimeSpan TotalWorkHours
         {
             get { return _totalWorkHours; }
             set
             {
                 _totalWorkHours = value;
-                TimeToGoHome = DateTime.Now.Add(_totalWorkTimeOfDay.Subtract(TotalWorkHours));
+                TimeToGoHome = DateTime.Now.Add(_targetWork.Subtract(TotalWorkHours));
                 RaisePropertyChanged(() => TotalWorkHours);
+                RaisePropertyChanged(() => WorkProgressPercent);
+                RaisePropertyChanged(() => WorkProgressText);
+                RaisePropertyChanged(() => TotalOutHoursString);
 
             }
         }
@@ -110,147 +119,254 @@ namespace TimeTicker.ViewModel
         public string TotalOutHoursString
         {
             get { return TimeSpan.FromMinutes(TotalOutHours.TotalMinutes).ToString(@"h\:mm"); }
-          
+
         }
 
-      
 
-        private void StartTimerCount()
+
+        public TimeEntryModel LastTimeEntry
         {
-
-            if (LastTimeEntry == null)
-                return;
-            if (_dispatcherTimer == null)
+            get
             {
-                _dispatcherTimer = new DispatcherTimer
+                return _lastTimeEntry;
+            }
+            set
+            {
+                _lastTimeEntry = value;
+                RaisePropertyChanged(() => LastTimeEntry);
+
+            }
+        }
+        private DateTime? GetFirstTimeIn()
+        {
+            if (TimeEntryList == null || TimeEntryList.Count == 0)
+                return null;
+
+            return TimeEntryList
+                .Select(e => e.TimeIn)
+                .OrderBy(t => t)
+                .FirstOrDefault();
+        }
+
+
+
+        private void RecalculateTotals()
+        {
+            TotalWorkHours = TimeEntryList.Aggregate(
+                TimeSpan.Zero, (sum, e) => sum + e.WorkDuration);
+
+            // 2️⃣ Total elapsed time since first login
+            var firstIn = GetFirstTimeIn();
+            if (firstIn.HasValue)
+            {
+                var totalElapsed = DateTime.Now - firstIn.Value;
+
+                // 3️⃣ Out Hours = elapsed - work
+                TotalOutHours = totalElapsed - TotalWorkHours;
+
+                if (TotalOutHours < TimeSpan.Zero)
+                    TotalOutHours = TimeSpan.Zero;
+            }
+
+
+
+            TimeToGoHome = DateTime.Now + (_targetWork - TotalWorkHours);
+        }
+
+        public void LoadTimeData()
+        {
+            TimeEntryList.Clear();
+            var states = TimeTickerHelper.ReadStates();
+
+            DateTime? openIn = null;
+
+            foreach (var (time, isIn) in states)
+            {
+                if (isIn)
                 {
-                    Interval = new TimeSpan(0, 0, 5)
-                };
-                _dispatcherTimer.Tick += (s, e) =>
+                    openIn = time;
+                }
+                else if (openIn.HasValue)
                 {
-                    LastTimeEntry.TimeOut = DateTime.Now.ToString(TimeFormat);
-                    var outHours = DateTime.ParseExact(LastTimeEntry.TimeOut, TimeFormat, System.Globalization.CultureInfo.InvariantCulture) -
-                                               DateTime.ParseExact(LastTimeEntry.TimeIn, TimeFormat, System.Globalization.CultureInfo.InvariantCulture);
-
-                    LastTimeEntry.WorkHours = TimeSpan.FromMinutes(outHours.TotalMinutes).ToString(@"h\:mm\:ss");
-                    TimeEntryList = new ObservableCollection<TimeEntryModel>(TimeEntryList);
-
-                    var totalWorkHours = new TimeSpan();
-                    foreach (var timeEntryModel in TimeEntryList)
+                    TimeEntryList.Add(new TimeEntryModel
                     {
-                        var ss = DateTime.ParseExact(timeEntryModel.WorkHours, @"h\:mm\:ss", System.Globalization.CultureInfo.InvariantCulture);
-                        var timespan = new TimeSpan(ss.Hour, ss.Minute, ss.Second);
-                        totalWorkHours = totalWorkHours.Add(timespan);
-                    }
-                    TotalWorkHours = totalWorkHours;
-                    if (TotalWorkHours> TimeSpan.FromHours(8.5))
-                    {
-                        var app = App.Current as App;
-                        if (app != null && app._notifyIcon.Tag==null)
-                        {
+                        TimeIn = openIn.Value,
+                        TimeOut = time
+                    });
+                    openIn = null;
+                }
+            }
 
-                            var rnd = new Random();
-                            app._notifyIcon.ShowBalloonTip(
-                                "Time Tracker",
-                                completionMessages[rnd.Next(completionMessages.Length)],
-                                BalloonIcon.None
-                            );
+            if (openIn.HasValue)
+            {
+                LastTimeEntry = new TimeEntryModel { TimeIn = openIn.Value };
+                TimeEntryList.Add(LastTimeEntry);
+            }
 
-                            app._notifyIcon.Tag= true;
-                        }
-                    }
+            RecalculateTotals();
+            StartTimer();
+        }
 
-                    if (count>10)
-                    {
-                        GetTimeData();
-                        count = 0;
 
-                        if (notifyIcon==null)
-                        {
-                            notifyIcon = (TaskbarIcon)Application.Current.FindResource("NotifyIcon");
-                            notifyIcon.ToolTipText = TimeToGoHome.ToString(TimeFormat);
-                        }
-                    }
+        private bool _isUserActive = true;
 
-                    if (IsInDesignMode)
-                    {
-                        _dispatcherTimer.Stop();
-                    }
-
+        private void StartTimer()
+        {
+            if (_timer == null)
+            {
+                _timer = new DispatcherTimer
+                {
+                    Interval = TimeSpan.FromSeconds(1)
                 };
             }
 
-            _dispatcherTimer.Start();
-        }
-
-        public void StopTimerCount()
-        {
-            _dispatcherTimer.Stop();
-        }
-
-
-        public void GetTimeData()
-        {
-            var filepath = TimeTickerUtil.TimeTickerHelper.FilePath;
-            if (File.Exists(filepath))
+            // Create mover with 150px radius
+            var mover = new MouseCircleMover();
+            if (!_timer.IsEnabled)
             {
-                DateTime? firstInTime=null;
-                
-                    var fileLines = File.ReadAllText(filepath).Split(new[] { Environment.NewLine }, StringSplitOptions.None);
-                    TotalWorkHours = new TimeSpan();
-                    foreach (var line in fileLines)
+
+                _timer.Tick += (_, __) =>
+                {
+                    RaisePropertyChanged(() => TimeEntryList);
+                    RecalculateTotals();
+
+                    var idle = IdleTimeDetector.GetIdleTime();
+                    bool isActiveNow = idle < TimeSpan.FromSeconds(300);
+                    System.Diagnostics.Debug.WriteLine("Idle time : " + idle.TotalSeconds);
+                    if (isActiveNow != _isUserActive)
                     {
-                        if (string.IsNullOrEmpty(line))
-                        {
-                            continue;
-                        }
-
-                        var timelog = line.Split(',');
-                        var timein = timelog[0];
-                        if (firstInTime==null)
-                        {
-                            firstInTime = DateTime.ParseExact(timein, TimeFormat, System.Globalization.CultureInfo.InvariantCulture);
-                        }
-
-                        var timeout = timelog.Length > 1 ? timelog[1] : DateTime.Now.ToString(TimeFormat);
-
-                        var workingHours = DateTime.ParseExact(timeout, TimeFormat, System.Globalization.CultureInfo.InvariantCulture) -
-                                        DateTime.ParseExact(timein, TimeFormat, System.Globalization.CultureInfo.InvariantCulture);
-
-                        TotalWorkHours = TotalWorkHours.Add(workingHours);
-
-                        var timeDetails = new TimeEntryModel
-                        {
-                            TimeIn = timein,
-                            TimeOut = timeout,
-                            WorkHours = TimeSpan.FromMinutes(workingHours.TotalMinutes).ToString(@"h\:mm\:ss")
-                        };
-
-                        if (timelog.Length == 1)
-                        {
-                            LastTimeEntry = timeDetails;
-                        }
-                        TimeEntryList.Add(timeDetails);
-                    }
-                    if (firstInTime.HasValue)
+                        _isUserActive = isActiveNow;
+                        Task.Run(() =>
                     {
-                        var totalhoursInOffice= DateTime.Now - firstInTime.GetValueOrDefault();
-                        TotalOutHours = totalhoursInOffice - _totalWorkHours;
+                        mover.Run();
+                    });
                     }
 
-                    RaisePropertyChanged(() => TotalWorkHours);
-            }
-            else
-            {
-                TimeTickerHelper.WriteToFile(true);
 
-                GetTimeData();
+                    if (!_celebrationShown && TotalWorkHours >= _targetWork)
+                    {
+                        ShowCelebration();
+                        _celebrationShown = true;
+                    }
+
+                };
+                _timer.Start();
             }
 
-            StartTimerCount();
+            
         }
+        private void ShowCelebration()
+        {
+            var rnd = new Random();
+            var app = (App)Application.Current;
+
+            app._notifyIcon.ShowBalloonTip(
+                "TimeTicker 🎉",
+                completionMessages[rnd.Next(completionMessages.Length)],
+                BalloonIcon.None
+            );
+        }
+
+    //    private const int Port = 50505;
+    //    private readonly ConcurrentDictionary<string, DateTime> _peers = new ConcurrentDictionary<string, DateTime>();
+    //    public ObservableCollection<ActiveUserInfo> ActiveUsers { get; }
+    //= new ObservableCollection<ActiveUserInfo>();
+
+
+    //    private int _activeUserCount;
+    //    public int ActiveUserCount
+    //    {
+    //        get => _activeUserCount;
+    //        private set
+    //        {
+    //            if (_activeUserCount != value)
+    //            {
+    //                _activeUserCount = value;
+    //                RaisePropertyChanged(() => ActiveUserCount);
+    //            }
+    //        }
+    //    }
+
+
+        //private void StartPresence()
+        //{
+        //    _ = Task.Run(BroadcastLoop);
+        //    _ = Task.Run(ListenLoop);
+        //    _ = Task.Run(CleanupLoop);
+        //}
+
+
+
+        //// 🔹 Broadcast "I'm alive"
+        //private async Task BroadcastLoop()
+        //{
+        //    using (var udp = new UdpClient())
+        //    {
+        //        udp.EnableBroadcast = true;
+
+        //        var endpoint = new IPEndPoint(IPAddress.Broadcast, Port);
+
+        //        while (true)
+        //        {
+        //            string msg = $"{Environment.MachineName}|{Environment.UserName}|{DateTime.UtcNow:o}";
+        //            byte[] data = Encoding.UTF8.GetBytes(msg);
+
+        //            await udp.SendAsync(data, data.Length, endpoint);
+        //            await Task.Delay(3000);
+        //        }
+        //    }
+        //}
+
+        //// 🔹 Listen for others
+        //private async Task ListenLoop()
+        //{
+        //    using (var udp = new UdpClient(Port))
+
+        //        while (true)
+        //        {
+        //            var result = await udp.ReceiveAsync();
+        //            var parts = Encoding.UTF8.GetString(result.Buffer).Split('|');
+
+        //            if (parts.Length < 3)
+        //                continue;
+
+        //            var ip = result.RemoteEndPoint.Address.ToString();
+
+        //            App.Current.Dispatcher.Invoke(() =>
+        //            {
+        //                var existing = ActiveUsers.FirstOrDefault(x => x.Ip == ip);
+        //                if (existing == null)
+        //                {
+        //                    ActiveUsers.Add(new ActiveUserInfo
+        //                    {
+        //                        Ip = ip,
+        //                        MachineName = parts[0],
+        //                        UserName = parts[1]
+        //                    });
+        //                }
+        //            });
+        //        }
+        //}
+
+
+        //// 🔹 Remove inactive peers & update count
+        //private async Task CleanupLoop()
+        //{
+        //    while (true)
+        //    {
+        //        App.Current.Dispatcher.Invoke(() =>
+        //        {
+        //            ActiveUserCount = ActiveUsers.Count;
+        //        });
+
+        //        await Task.Delay(2000);
+        //    }
+        //}
+
+
+
+
+
+
     }
-
-
-
 }

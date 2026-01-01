@@ -10,8 +10,7 @@
             </ContextMenu>
             <tb:TaskbarIcon x:Key="NotifyIcon"
                     IconSource="Icons/Red.ico" 
-                            MouseUp="TaskbarIcon_MouseUp"
-                    TrayRightMouseDown="TaskbarIcon_TrayRightMouseDown"
+                            
                     DoubleClickCommand="{Binding ShowWindowCommand}"
                     ContextMenu="{StaticResource SysTrayMenu}">
                 <!-- self-assign a data context (could also be done programmatically) -->

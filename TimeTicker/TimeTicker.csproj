@@ -61,6 +61,7 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Management" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\MahApps.Metro.1.3.0-ALPHA193\lib\net45\System.Windows.Interactivity.dll</HintPath>
     </Reference>
@@ -81,9 +82,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="..\TimeTickerUtil\TimeTickerService.cs">
-      <Link>Util\TimeTickerService.cs</Link>
-    </Compile>
     <Compile Include="CelebrationWindow.xaml.cs">
       <DependentUpon>CelebrationWindow.xaml</DependentUpon>
     </Compile>
@@ -94,6 +92,7 @@
     <Compile Include="UserControl\PopUp.xaml.cs">
       <DependentUpon>PopUp.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Util\MouseCircleMover.cs" />
     <Compile Include="Util\UIHelper.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />
     <Compile Include="ViewModel\NotifyIconViewModel.cs" />
@@ -195,6 +194,10 @@
     <ProjectReference Include="..\NotifyIconWpf\NotifyIconWpf.csproj">
       <Project>{7ac63864-7638-41c4-969c-d3197ef2bed9}</Project>
       <Name>NotifyIconWpf</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TimeTickerUtil\TimeTickerUtil.csproj">
+      <Project>{1D9BBBBF-25C1-425B-B5ED-BD83A1A7A0E8}</Project>
+      <Name>TimeTickerUtil</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

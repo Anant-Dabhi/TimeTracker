@@ -11,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TimeTrackerService", "TimeT
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TimeTickerUtil", "TimeTickerUtil\TimeTickerUtil.csproj", "{1D9BBBBF-25C1-425B-B5ED-BD83A1A7A0E8}"
 EndProject
-Project("{B7DD6F7E-DEF8-4E67-B5B7-07EF123DB6F0}") = "WixInstaller", "WixInstaller\WixInstaller.wixproj", "{8B7D4EF5-A57B-4F58-B330-3547309A65D3}"
+Project("{B7DD6F7E-DEF8-4E67-B5B7-07EF123DB6F0}") = "TimeTrackerInstaller", "WixInstaller\TimeTrackerInstaller.wixproj", "{8B7D4EF5-A57B-4F58-B330-3547309A65D3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

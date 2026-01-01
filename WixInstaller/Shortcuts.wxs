@@ -40,6 +40,18 @@
 				  Value="1"
 				  KeyPath="yes" />
 			</Component>
+
+			<Component Id="StartupShortcutComponent" Guid="*">
+
+				<RegistryValue
+				  Root="HKCU"
+				  Key="Software\Microsoft\Windows\CurrentVersion\Run"
+				  Name="TimeTicker"
+				  Value="&quot;[INSTALLFOLDER]TimeTicker.exe&quot;"
+				  Type="string"
+				  KeyPath="yes" />
+
+			</Component>
 			
 		</ComponentGroup>
 	</Fragment>

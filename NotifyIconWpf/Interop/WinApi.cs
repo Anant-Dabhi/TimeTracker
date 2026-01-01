@@ -80,10 +80,10 @@ namespace Hardcodet.Wpf.TaskbarNotification.Interop
         /// Gets the screen coordinates of the current mouse position.
         /// </summary>
         [DllImport("USER32.DLL", SetLastError = true)]
-        public static extern bool GetPhysicalCursorPos(ref Point lpPoint);
+        public static extern bool GetPhysicalCursorPos(ref System.Drawing.Point lpPoint);
 
 
         [DllImport("USER32.DLL", SetLastError = true)]
-        public static extern bool GetCursorPos(ref Point lpPoint);
+        public static extern bool GetCursorPos(ref System.Drawing.Point lpPoint);
     }
 }

@@ -19,8 +19,8 @@ namespace TimeTicker.ViewModel
             Application.Current.MainWindow = timewindow;
             //Application.Current.MainWindow.Show();
             var vm = timewindow.DataContext as ViewModel.TimeTickerViewModel;
-            vm.GetTimeData();
-            
+            vm.LoadTimeData();
+
         }
 
         /// <summary>
