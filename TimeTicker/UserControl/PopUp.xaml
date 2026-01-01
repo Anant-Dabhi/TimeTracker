@@ -80,30 +80,45 @@
                     <RowDefinition Height="Auto" ></RowDefinition>
                 </Grid.RowDefinitions>
                 <DataGrid Grid.Column="1" Padding="2" Grid.Row="1"  ItemsSource="{Binding TimeEntryList}" VerticalAlignment="Stretch" ColumnWidth="*" AutoGenerateColumns="False" CanUserSortColumns="False" IsReadOnly="True" >
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Time In" Binding="{Binding TimeIn}" Width="*"  />
-                        <DataGridTextColumn Header="Time Out" Binding="{Binding TimeOut}" Width="*" />
-                        <!--<DataGridTextColumn Header="Out Hours" Binding="{Binding OutHours}" Width="*" />-->
-                        <DataGridTextColumn Header="Work Hours" Binding="{Binding WorkHours}" Width="*" />
-                    </DataGrid.Columns>
-                </DataGrid>
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Time In" Binding="{Binding TimeInText}" Width="*"  />
+                <DataGridTextColumn Header="Time Out" Binding="{Binding TimeOutText}" Width="*" />
+                <!--<DataGridTextColumn Header="Out Hours" Binding="{Binding OutHours}" Width="*" />-->
+                <DataGridTextColumn Header="Work Hours" Binding="{Binding WorkHoursText}" Width="*" />
+            </DataGrid.Columns>
+        </DataGrid>
                 <StackPanel Grid.Column="1" Grid.Row="2" Background="#CCCC" >
-                    <TextBlock  >
-                    <Run  Text="Total Work Time :"/>
-                    <Run  Text="{Binding TotalWorkHours}"/>
-                    </TextBlock>
 
-                    <TextBlock>
-                    <Run  Text="Out Hours:"/>
-                    <Run  Text="{Binding TotalOutHoursString,Mode=OneWay}"/>
-                    </TextBlock>
+            <!-- Progress Text -->
+            <TextBlock FontWeight="SemiBold" Margin="0,0,0,5">
+        <Run Text="Daily Progress: " />
+        <Run Text="{Binding WorkProgressText,Mode=OneWay}" />
+            </TextBlock>
 
-                    <TextBlock>
-                    <Run  Text="Time To Go Home:"/>
-                    <Run  Text="{Binding TimeToGoHome, StringFormat={}{0:h:mm tt}}"/>
-                    </TextBlock>
+            <!-- Progress Bar -->
+            <ProgressBar
+        Height="10"
+        Minimum="0"
+        Maximum="100"
+        Value="{Binding WorkProgressPercent,Mode=OneWay}"/>
 
-                    
-                </StackPanel>
+            <!-- Existing Info -->
+            <TextBlock Margin="0,8,0,0">
+        <Run Text="Total Work Time: " />
+        <Run Text="{Binding TotalWorkHours, StringFormat={}{0:hh\\:mm}}" />
+            </TextBlock>
+
+            <TextBlock>
+        <Run Text="Out Hours: " />
+        <Run Text="{Binding TotalOutHoursString,Mode=OneWay}" />
+            </TextBlock>
+
+            <TextBlock>
+        <Run Text="Time To Go Home: " />
+        <Run Text="{Binding TimeToGoHome, StringFormat={}{0:h:mm tt}}" />
+            </TextBlock>
+
+
+        </StackPanel>
     </Grid>
 </UserControl>
